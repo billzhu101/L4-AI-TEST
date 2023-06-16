@@ -1,6 +1,6 @@
 export default [
   {
-    title: 'AI-TEST',
+    title: 'Table-Inquiry-Test',
     path: '/',
     component: '@/pages/intelligentCommand',
   },
