@@ -1,18 +1,30 @@
-import { Upload, Button, Modal, message } from 'antd';
+import { Upload, Modal, message, Input } from 'antd';
 import { useDispatch, useSelector } from 'umi';
+import { useState } from 'react';
 import styles from './index.less';
+
 export default () => {
+  let [isEdit, setEdit] = useState(false);
   const dispatch = useDispatch();
-  const { attachments } = useSelector((state) => state.intelligentCommand);
+
+  const { attachments, explain } = useSelector(
+    (state) => state.intelligentCommand,
+  );
+  const showExplain = !!attachments.find((r) => r.status === 'done');
   const onChanges = ({ file, fileList }) => {
     if (file?.response?.XCmdrCode !== undefined) {
       const list =
         file.status === 'done' && file.response?.XCmdrCode === 0 ? [file] : [];
-
       dispatch({
         type: 'intelligentCommand/overrideStateProps',
         payload: {
           attachments: list,
+        },
+      });
+      dispatch({
+        type: 'intelligentCommand/getFileExplain',
+        payload: {
+          fileName: file?.name?.split('.')[0],
         },
       });
       if (file.status === 'done' && file.response.XCmdrCode !== 0) {
@@ -55,9 +67,42 @@ export default () => {
   };
   return (
     <div className={styles.uploadList}>
+      <div className={styles.file}>Excel文件</div>
       <Upload {...props} fileList={attachments} onChange={(e) => onChanges(e)}>
-        <Button className={styles.button}>提交Excel文件</Button>
+        <div className={styles.link}>提交</div>
       </Upload>
+      {showExplain ? (
+        <>
+          <div className={styles.explain}>文件说明</div>
+          <div
+            className={styles.submit}
+            onClick={() => {
+              if (isEdit) {
+                dispatch({});
+              }
+              setEdit(!isEdit);
+            }}
+          >
+            {!isEdit ? '编辑' : '提交'}
+          </div>
+          {isEdit ? (
+            <Input.TextArea
+              className={styles.text}
+              onChange={(e) => {
+                dispatch({
+                  type: 'intelligentCommand/overrideStateProps',
+                  payload: {
+                    explain: e.target.value,
+                  },
+                });
+              }}
+              value={explain}
+            />
+          ) : (
+            <div className={styles.text}>{explain}</div>
+          )}
+        </>
+      ) : null}
     </div>
   );
 };

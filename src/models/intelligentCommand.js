@@ -18,6 +18,7 @@ export default {
     ],
     status: 'start', // start、speakingStart、speaking、speakingEnd、end
     attachments: [],
+    explain: '',
   },
   reducers: {
     overrideStateProps(state, { payload }) {
@@ -84,5 +85,33 @@ export default {
         payload: { question: '', status: 'success' },
       });
     },
+  },
+  *getFileExplain({ payload }, { call, put }) {
+    const { fileName } = payload;
+    const response = yield call(IntelligentCommand.getFileExplain, fileName);
+    if (!!response) {
+      yield put({
+        type: 'overrideStateProps',
+        payload: { explain: response },
+      });
+    }
+  },
+  *editFileExplain(_, { call, select }) {
+    const { attachments, explain } = yield select(
+      (state) => state.intelligentCommand,
+    );
+    if (!attachments?.length) {
+      return message.error('请上传Excel文件');
+    }
+
+    const fileName = attachments[0].name.split('.')[0];
+    const response = yield call(
+      IntelligentCommand.editFileExplain,
+      fileName,
+      explain,
+    );
+    if (!!response) {
+      message.success(response.XCmdrMsg || '编辑说明成功');
+    }
   },
 };
