@@ -18,7 +18,6 @@ export default () => {
     (state) => state.intelligentCommand,
   );
   const wsRef = useRef({});
-  const timerRef = useRef();
   let resultText = '';
   let resultTextTemp = '';
   let countdownInterval;
