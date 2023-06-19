@@ -21,14 +21,9 @@ export default () => {
           attachments: list,
         },
       });
-      dispatch({
-        type: 'intelligentCommand/getFileExplain',
-        payload: {
-          fileName: file?.name?.split('.')[0],
-        },
-      });
-      if (file.status === 'done' && file.response.XCmdrCode !== 0) {
-        message.error('上传附件失败');
+
+      if (file.status === 'done' && file?.response !== 'OK') {
+        message.error('上传文件失败');
       }
     } else {
       let list = [];
@@ -41,6 +36,12 @@ export default () => {
           attachments: list,
         },
       });
+      if (file?.status === 'done' && file?.response === 'OK') {
+        message.success('上传文件成功');
+        dispatch({
+          type: 'intelligentCommand/getFileExplain',
+        });
+      }
     }
   };
   const props = {
@@ -78,7 +79,7 @@ export default () => {
             className={styles.submit}
             onClick={() => {
               if (isEdit) {
-                dispatch({});
+                dispatch({ type: 'intelligentCommand/editFileExplain' });
               }
               setEdit(!isEdit);
             }}
@@ -88,6 +89,7 @@ export default () => {
           {isEdit ? (
             <Input.TextArea
               className={styles.text}
+              placeholder="请输入文件说明"
               onChange={(e) => {
                 dispatch({
                   type: 'intelligentCommand/overrideStateProps',
